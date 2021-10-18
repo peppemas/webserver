@@ -1,4 +1,4 @@
-# web server for developers
+# standalone web server for developers
 
 A super simple standalone http web server useful for development and testing purpose.
 
