@@ -16,15 +16,15 @@ A super simple standalone http web server useful for development and testing pur
 
 -d directory to host (default: ./)
 
-##license
+## license
 MIT license (© 2021 VICTRIX Games)
 
 ## third parties licenses:
 
-###httplib 
+### httplib 
 MIT license (© 2021 Yuji Hirose)
 
-###popl
+### popl
 
 MIT License
 
