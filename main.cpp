@@ -45,9 +45,9 @@ int main(int argc, char **argv) {
     //============================================================================================
     OptionParser op("Allowed options");
     auto help_option     = op.add<Switch>("", "help", "produce help message");
-    auto host_option   = op.add<Implicit<std::string>>("h", "host", "the host to listen to", "localhost");
-    auto port_option = op.add<Implicit<int>>("p", "port", "the port number", 8080);
-    auto directory_option = op.add<Implicit<std::string>>("d", "directory", "base directory to host", "./");
+    auto host_option   = op.add<Value<std::string>>("h", "host", "the host to listen to", "localhost");
+    auto port_option = op.add<Value<int>>("p", "port", "the port number", 8080);
+    auto directory_option = op.add<Value<std::string>>("d", "directory", "base directory to host", "./");
     port_option->assign_to(&port);
     host_option->assign_to(&host);
     directory_option->assign_to(&mount_directory);
@@ -63,8 +63,7 @@ int main(int argc, char **argv) {
         std::cerr << "error:  ";
         return -1;
     } catch (const std::exception& e) {
-        //std::cerr << "option: " << e.option()->name(e.what_name()) << "\n";
-        //std::cerr << "value:  " << e.value() << "\n";
+        std::cerr << "Generic error: " << e.what() << "\n";
         return -1;
     }
 
@@ -87,10 +86,28 @@ int main(int argc, char **argv) {
     }
 
     //============================================================================================
+    // set error handler
+    //============================================================================================
+    svr->set_error_handler([](const auto& req, auto& res) {
+        std::cout << "request " << req.method << " " << req.path << " error: " << res.status << std::endl;
+        const char* fmt = "<p>Error Status: <span style='color:red;'>%d</span></p>";
+        char buf[BUFSIZ];
+        snprintf(buf, sizeof(buf), fmt, res.status);
+        res.set_content(buf, "text/html");
+    });
+
+    //============================================================================================
     // set post routing handler
     //============================================================================================
     svr->set_post_routing_handler([](const auto& req, auto& res) {
         res.set_header("Access-Control-Allow-Origin", "*");
+    });
+
+    //============================================================================================
+    // redirect root to index.html
+    //============================================================================================
+    svr->Get("/", [=](const Request & /*req*/, Response &res) {
+        res.set_redirect("/index.html");
     });
 
     //============================================================================================
